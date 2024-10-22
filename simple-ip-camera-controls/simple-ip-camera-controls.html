@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      *{ 
+        Color : #fff; 
+        Background : #1F1E1F;
+      } 
+      button {
+        border: none;
+        color: white;
+        padding: 5px 5px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 1px 1px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      input{
+        margin: 5px 0px;
+        border: 1px solid #828180;
+      }
+
+      .show-add-btn {
+        background-color: #828180;
+        padding: 5px 6px;
+        margin: 10px 0px;
+      }
+
+      .add-camera-btn {
+        background-color: #828180;
+        margin: 10px 0px;
+      }
+
+      .import-export-btn {
+        background-color: #828180;
+        margin: 0px 5px;
+        width: 50%;
+      }
+
+      .add-remove-btn {
+        background-color: #828180;
+        margin: 0px 10px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .preset-btn {
+        margin: 5px 5px;
+        background-color: #828180;
+      }
+
+      .active-preset-btn {
+        color: #000000;
+        background-image: linear-gradient(90deg, #009dff 0%, #00f2ff 49%, #36ffe8 80%, #00C0FF 100%);
+        animation:slidebg 5s linear infinite;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+      .column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .pan-tilt-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        background-color: #828180;
+        width: 25px;
+        height: 25px;
+        margin: 1px 5px;
+      }
+      .camera-container {
+        border: 1px solid #ffffff;
+        border-radius: 5px;
+        flex: 1;
+        position: relative;
+        width: 300px;
+        min-width: 200px;
+        height: 350px;
+      }
+
+      .remove-camera-btn {
+        margin-right: 10px;
+        top: 0;
+        right: 0;
+        position: absolute;
+        background-color: transparent;
+      }
+
+    </style>
+  </head>
+  <!-- BODY -->
+  <body>
+    <div class="container">
+      <div class="column">
+        <button onclick="toggleOptions()" class="show-add-btn" id="opts-btn">Options +</button> 
+        <div class="row" id="add-cameras" style="margin-bottom: 20px; display: none;">
+          <div class="column" id="add-camera-inputs">
+            <input type="text" id="camera-name-input" placeholder="Camera Name">
+            <input type="text" id="camera-ip-input" placeholder="IP Address">
+            <input type="text" id="camera-username-input" placeholder="Username">
+            <input type="text" id="camera-password-input" placeholder="Password">
+            <div class="row" style="margin-bottom: 5px;">
+              <input type="checkbox" id="camera-add-pan-zoom-controls" style="margin-right: 10px;"><label for="camera-add-pan-zoom-controls">Add Pan/Tilt/Zoom Controls</label>
+            </div>
+            <div id="add-preset-inputs" class="column">
+              <div class="row">
+                <span>Presets</span> <button class="add-remove-btn" onclick="addPreset()">+</button>
+              </div>
+              <div class="row">
+                <input type="text" id="preset-id-1" placeholder="Preset ID 1">
+                <input type="text" id="preset-name-1" placeholder="Preset Name 1">
+                <input type="text" id="preset-color-1" placeholder="Preset Color 1">
+              </div>
+            </div>
+            <button onclick="addCamera()" class="add-camera-btn">Add Camera</button>
+            <div class="row">
+              <button class="import-export-btn" onclick="exportData()">Export</button>
+              <button class="import-export-btn" onclick="importData()">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="row" id="cameras" style="flex-wrap: wrap;">
+          <!-- CAMERAS GO HERE -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+
+  let presetCount = 1;
+  let data = [];
+
+  function toggleOptions() {
+    document.getElementById("opts-btn").innerText = document.getElementById("opts-btn").innerText === "Options +" ? "Options -" : "Options +";
+    document.getElementById("add-cameras").style.display = document.getElementById("add-cameras").style.display === "none" ? "flex" : "none";
+  }
+
+  function addCamera(dataInput) {
+    let cameraData;
+
+    if(dataInput){
+      cameraData = dataInput;
+    } else {
+      cameraData = {
+        name: document.getElementById("camera-name-input").value,
+        ip: document.getElementById("camera-ip-input").value,
+        username: document.getElementById("camera-username-input").value,
+        password: document.getElementById("camera-password-input").value,
+        showPanTiltZoomControls: document.getElementById("camera-add-pan-zoom-controls").checked,
+      };
+      cameraData.presets = [];
+      for(let i = 1; i <= presetCount; i++){
+        cameraData.presets.push({id: document.getElementById(`preset-id-${i}`).value, name: document.getElementById(`preset-name-${i}`).value, color: document.getElementById(`preset-color-${i}`).value});
+      }
+      data.push(cameraData);
+    }
+
+    addCameraHtml(cameraData);
+    if(!dataInput){
+      removeListeners();
+      addListeners();
+    }
+    resetAddCameraInputs();
+  }
+
+  function addPreset() {
+    let existingPresets = [];
+    for(let i = 1; i <= presetCount; i++){
+      existingPresets.push({
+        id: document.getElementById(`preset-id-${i}`).value,
+        name: document.getElementById(`preset-name-${i}`).value,
+        color: document.getElementById(`preset-color-${i}`).value
+      });
+    }
+
+    presetCount++;
+    document.getElementById("add-preset-inputs").innerHTML += 
+    `<div class="row">
+      <input type="text" id="preset-id-${presetCount}" placeholder="Preset ID ${presetCount}">
+      <input type="text" id="preset-name-${presetCount}" placeholder="Preset Name ${presetCount}">
+      <input type="text" id="preset-color-${presetCount}" placeholder="Preset Color ${presetCount}">
+    </div>`;
+
+    for(let i = 0; i < existingPresets.length; i++){
+        document.getElementById(`preset-id-${i + 1}`).value = existingPresets[i].id;
+        document.getElementById(`preset-name-${i + 1}`).value = existingPresets[i].name;
+        document.getElementById(`preset-color-${i + 1}`).value = existingPresets[i].color;
+    }
+  }
+
+  function removeCamera(ip) {
+    if(window.confirm("Are you sure you want to remove this camera?")){
+      removeListeners();
+      const removalElement = document.getElementById(`camera-${ip}`);
+      removalElement.remove();
+      data = data.filter(camera => camera.ip !== ip);
+      addListeners();
+    };
+  }
+
+  function addCameraHtml(cameraData){
+    let cameraHtml = `
+      <div class="row camera-container" id="camera-${cameraData.ip}">
+        <div class="column" style="width: 100%; height: 100%;">
+          <div>
+            <button class="remove-camera-btn" id="remove-camera-btn-${cameraData.ip}">x</button>
+          </div>
+          <div class="row">
+            <h3>${cameraData.name}</h3>
+          </div>
+          <div class="row" style="flex-wrap: wrap;">`;
+
+    for(let i = 0; i < cameraData.presets.length; i++){
+      cameraHtml += `
+          <button 
+          onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?gotoserverpresetname=${cameraData.presets[i].id}';" 
+          class="preset-btn"
+          id="preset-btn-${cameraData.ip}-${cameraData.presets[i].id}"
+          style="background-color: ${cameraData.presets[i].color};">
+            ${cameraData.presets[i].name}
+          </button>`;
+    }
+
+    if(cameraData.showPanTiltZoomControls){
+      cameraHtml += `
+            </div>
+            <hr style="width: 90%;">
+            <div class="row">
+              <button class="pan-tilt-controls" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rtilt=3';">
+                ^
+              </button>
+            </div>
+            <div class="row">
+              <button class="pan-tilt-controls" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rtilt=-4';">
+                <
+              </button>
+              <button class="pan-tilt-controls" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rtilt=4';">
+                >
+              </button>
+            </div>
+            <div class="row">
+              <button class="pan-tilt-controls" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rtilt=-3';">
+                v
+              </button>
+            </div>
+            <div class="row" style="margin-bottom: 15px;">
+              <button class="pan-tilt-controls" style="width: 50px; background-color: #3380ff;" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rzoom=200';">
+                +
+              </button>
+              <button class="pan-tilt-controls" style="width: 50px; background-color: #ffb533;" onclick="window.location.href='http://${cameraData.username}:${cameraData.password}@${cameraData.ip}/axis-cgi/com/ptz.cgi?rzoom=-200';">
+                -
+              </button>
+            </div>
+          </div>
+        `;
+    }
+
+    cameraHtml += `</div> </div> </div>`;
+
+    document.getElementById("cameras").innerHTML += cameraHtml;
+  }
+
+  function addListeners(){
+    for(let i = 0; i < data.length; i++){ 
+      document.getElementById(`remove-camera-btn-${data[i].ip}`).addEventListener("click", function(){ removeCamera(data[i].ip) });
+      for(let j = 0; j < data[i].presets.length; j++){
+        document.getElementById(`preset-btn-${data[i].ip}-${data[i].presets[j].id}`).addEventListener("click", function(){
+            handlePresetClick(data[i], data[i].presets[j].id);
+        });
+      }
+    }
+  }
+
+  function removeListeners(){
+    for(let i = 0; i < data.length; i++){
+      document.getElementById(`remove-camera-btn-${data[i].ip}`).removeEventListener("click", function(){ removeCamera(data[i].ip) });
+      for(let j = 0; j < data[i].presets.length; j++){
+        document.getElementById(`preset-btn-${data[i].ip}-${data[i].presets[j].id}`).removeEventListener("click", function(){
+          handlePresetClick(data[i], data[i].presets[j].id);
+        });
+      } 
+    }
+  } 
+
+  function resetAddCameraInputs() {
+    document.getElementById("camera-name-input").value = "";
+    document.getElementById("camera-ip-input").value = "";
+    document.getElementById("camera-username-input").value = "";
+    document.getElementById("camera-password-input").value = "";
+    document.getElementById("camera-add-pan-zoom-controls").checked = false;
+    // Remove new preset inputs
+    document.getElementById("add-preset-inputs").innerHTML = 
+      `<div class="row">
+        <span>Presets</span> <button class="add-remove-btn" onclick="addPreset()">+</button>
+      </div>
+      <div class="row">
+        <input type="text" id="preset-id-1" placeholder="Preset ID 1">
+        <input type="text" id="preset-name-1" placeholder="Preset Name 1">
+        <input type="text" id="preset-color-1" placeholder="Preset Color 1">
+      </div>`;
+
+    presetCount = 1;
+  }
+
+  function exportData(){
+    const dataString = JSON.stringify(data);
+    const blob = new Blob([dataString], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cameraData.json";
+    a.click();
+  }
+
+  function handlePresetClick(cameraData, presetId){
+    document.getElementById(`preset-btn-${cameraData.ip}-${presetId}`).classList.add("active-preset-btn");
+    for(let i = 0; i < cameraData.presets.length; i++){
+      if(cameraData.presets[i].id !== presetId){
+        document.getElementById(`preset-btn-${cameraData.ip}-${cameraData.presets[i].id}`).classList.remove("active-preset-btn");
+      }
+    }
+  }
+
+  async function importData(){
+    const pickerOpts = {
+      types: [
+        {
+          description: "JSON",
+          accept: {
+            "application/json": [".json"]
+          },
+        },
+      ],
+      excludeAcceptAllOption: true,
+      multiple: false,
+    };
+
+    if(window.confirm("This will clear all existing cameras and replace them with the imported data. Are you sure you want to continue?")){
+      try{
+        const filepath = await window.showOpenFilePicker(pickerOpts);
+        if (filepath && filepath.length > 0) {
+          const fileHandle = filepath[0];
+          const file = await fileHandle.getFile();
+          const contents = await file.text();
+          const importedData = JSON.parse(contents);
+          if(data.length > 0){
+            removeListeners();
+          }
+          data = importedData; // Replace existing data with imported data
+          // Clear existing cameras
+          document.getElementById("cameras").innerHTML = "";
+          // Add imported cameras
+          importedData.forEach(cameraData => {
+            addCamera(cameraData);
+          });
+          addListeners();
+          toggleOptions();
+        }
+      }catch(err){
+        console.error(err);
+      }
+    }
+  }
+
+</script>
