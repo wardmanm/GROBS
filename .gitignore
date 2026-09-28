@@ -1,1 +1,6 @@
 .DS_Store
+node_modules/
+
+# Personal agent settings (not shared)
+CLAUDE.local.md
+.claude/settings.local.json
