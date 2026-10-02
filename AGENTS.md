@@ -21,4 +21,5 @@ GROBS (Grand Raggidy OBS) is a monorepo of independent tools that make streaming
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) scoped to the tool: `feat(obs-producer): add team import`, `fix(sicc): preset colors`, `docs(obs-producer): ADR for storage`.
 - Reference issues in the commit or PR that completes them: `Closes #12`.
 - Release tags are `<tool>-v<semver>` (e.g. `obs-producer-v0.2.0`), and only that tool's release workflow creates them. Releases are always deliberate; see the [obs-producer releasing guide](obs-producer/docs/guides/releasing.md).
+- GitHub Actions in `.github/workflows/` use the current major version of every action (e.g. `actions/checkout@v7`). Dependabot (`.github/dependabot.yml`) opens a weekly `ci:` PR when a new version is out; review and merge it like any other change.
 - Don't push, open PRs, or rewrite published history unless asked.
