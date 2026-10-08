@@ -6,8 +6,9 @@ GROBS (Grand Raggidy OBS) is a monorepo of independent tools that make streaming
 
 | Path | What it is | Tech | Instructions |
 |---|---|---|---|
-| `obs-producer/` | LAN-hosted app for OBS overlays, producer dashboards, OBS control, and read-only CRG scoreboard integration | TypeScript, React, Node | [obs-producer/AGENTS.md](obs-producer/AGENTS.md) |
 | `simple-ip-camera-controls/` | Single-file PTZ controls for AXIS (VAPIX) IP cameras, usable as an OBS dock | Plain HTML/JS, no build | [SICC-README.md](simple-ip-camera-controls/SICC-README.md) |
+
+OBS Producer moved to Rollcall (wardmanm/rollcall_derby); its history and the obs-producer-v0.1.0 release stay here.
 
 ## Repo-wide rules
 
@@ -17,9 +18,8 @@ GROBS (Grand Raggidy OBS) is a monorepo of independent tools that make streaming
 
 ## Git workflow
 
-- Work on a branch; don't commit directly to `main`. Name branches `<type>/<short-topic>`, e.g. `feat/team-builder`, `docs/obs-producer-wiki`.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) scoped to the tool: `feat(obs-producer): add team import`, `fix(sicc): preset colors`, `docs(obs-producer): ADR for storage`.
+- Work on a branch; don't commit directly to `main`. Name branches `<type>/<short-topic>`, e.g. `feat/sicc-presets`.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) scoped to the tool: `feat(sicc): preset colors`.
 - Reference issues in the commit or PR that completes them: `Closes #12`.
-- Release tags are `<tool>-v<semver>` (e.g. `obs-producer-v0.2.0`), and only that tool's release workflow creates them. Releases are always deliberate; see the [obs-producer releasing guide](obs-producer/docs/guides/releasing.md).
-- GitHub Actions in `.github/workflows/` use the current major version of every action (e.g. `actions/checkout@v7`). Dependabot (`.github/dependabot.yml`) opens a weekly `ci:` PR when a new version is out; review and merge it like any other change.
+- Release tags are `<tool>-v<semver>`, and only that tool's release workflow creates them.
 - Don't push, open PRs, or rewrite published history unless asked.

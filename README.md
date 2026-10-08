@@ -2,13 +2,8 @@
 A mono-repo of assorted tools I've created to making streaming roller derby easier, more dynamic, and automated.  
 
 ---
-## OBS Producer *(in development)*
-A locally hosted web app for producing roller derby streams in OBS:
-- **Builders** for teams, themes, and overlay screens. Screens are loaded into OBS as browser sources.
-- **Live Mode** for events with multiple games and tracks running at once, with producer dashboards that preview and control what's on air.
-- **Integrations** with OBS (scene switching, hotkeys) and the [CRG scoreboard](https://github.com/rollerderby/scoreboard). CRG is read-only: the app listens to it and never writes to it.
-
-Start at the [OBS Producer wiki](obs-producer/docs/README.md).
+## OBS Producer → Rollcall
+OBS Producer moved to its own repository and is now **Rollcall**, a suite of apps for producing roller derby events and streams. The repository is private while the apps are split, and opens with its first release. Its history up to `obs-producer-v0.1.0` is in this repo's history and releases.
 
 ---
 ## Simple IP Camera Controls
